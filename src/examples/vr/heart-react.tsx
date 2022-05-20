@@ -60,12 +60,14 @@ const VR = () => {
    const mesh = new THREE.Mesh( geo, material );
    // center
    const group = new THREE.Group();
+   geo.computeBoundingSphere();
    const center = geo.boundingSphere!.center;
 
    group.position.set(-center.x, -center.y, -center.z);
    group.add(mesh);
 
    scene.add(group);
+
   }
  }, [geo]);
 

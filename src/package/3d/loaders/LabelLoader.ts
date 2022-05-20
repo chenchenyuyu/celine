@@ -66,7 +66,7 @@ const SingleLabelLoader = async(url: string) => {
   } else {
     geometry.computeVertexNormals();
   }
-  geometry.computeBoundingSphere();
+
  return geometry;
 };
 
