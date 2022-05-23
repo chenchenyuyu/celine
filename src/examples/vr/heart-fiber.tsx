@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useThree, extend, useFrame } from '@react-three/fiber';
+import { BufferGeometry, Vector3, AxesHelper, Color } from 'three';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
 
 import { SingleLabelLoader, MultiLabelLoader } from 'package/3d/loaders/LabelLoader';
-import { BufferGeometry, Vector3, AxesHelper, Color } from 'three';
+
+extend({ TrackballControls });
 
 const MultiGeometry = ({ geometry }: { geometry: any }) => {
   const ref = useRef<BufferGeometry>(null!);
@@ -18,20 +21,25 @@ const MultiGeometry = ({ geometry }: { geometry: any }) => {
 };
 
 const Scene = ({ children }: { children: React.ReactNode }) => {
-  const { camera, scene } = useThree();
+  const { camera, scene, gl } = useThree();
+  const control = useRef<any>();
 
   useEffect(() => {
     const axesHelper = new AxesHelper( 500 );
     scene.add( axesHelper );
-    camera.up.set(0, 0, 1);
-    camera.position.set(0, -300, 0);
-    camera.zoom = 2;
-    camera.lookAt(0, 0, 0);
-    camera.updateProjectionMatrix();
-  }, [camera]);
+    if(control.current) {
+      control.current.up0.set(0, 0, 1);
+      control.current.position0.set(0, -300, 0);
+      control.current.zoom0 = 2;
+      control.current.reset();
+    }
+  }, []);
+
+  useFrame(() => control.current && control.current.update());
 
   return(
     <>
+      <trackballControls args={[camera, gl.domElement]} ref={control}/>
       {children}
     </>
   );
