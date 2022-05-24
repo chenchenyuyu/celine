@@ -22,6 +22,19 @@ const style = (clicked: boolean) => ({
   cursor: 'pointer',
 });
 
+const styleItem = (clicked: boolean) => ({
+  width: '200px',
+  height: '30px',
+  lineHeight: '30px',
+  textAlgin: 'center',
+  color: '#fff',
+  background: clicked ? '#0164fe' : '#222a42',
+  marginBottom: '4px',
+  borderRadius: '4px',
+  cursor: 'pointer',
+  borderBottom: '1px solid #000',
+});
+
 interface IButton {
   id: number,
   focusId: number,
@@ -32,6 +45,12 @@ interface IButton {
 const Button = ({ id, focusId, setFocusId, children }: IButton) => {
   return(
     <div style={style(id === focusId)} onClick={() => setFocusId(id)}>{children}</div>
+  );
+}
+
+const Item = ({ id, focusId, setFocusId, children }: IButton) => {
+  return(
+    <div style={styleItem(id === focusId)} onClick={() => setFocusId(id)}>{children}</div>
   );
 }
 
@@ -118,6 +137,13 @@ const HeartView = () => {
           <Button id={id} focusId={focusId} setFocusId={setFocusId}>{coronaryMap[`${id}`]['en']}</Button>
         ))
       }
+      </div>
+      <div style={{position: 'absolute', right: '10px', top: '10px', width: '200px', height: '100%', zIndex: '2'}}>
+        {
+           data.map(({ userData: { id } }) => (
+            <Item id={id} focusId={focusId} setFocusId={setFocusId}>{coronaryMap[`${id}`]['zh']}</Item>
+          ))
+        }
       </div>
        <Canvas style={{position: 'absolute', top: '0px', right: '0px', bottom: '0px'}}>
         <Scene>
