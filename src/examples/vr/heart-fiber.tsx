@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useThree, extend, useFrame } from '@react-three/fiber';
-import { BufferGeometry, Vector3, AxesHelper, Color } from 'three';
+import { BufferGeometry, Vector3, AxesHelper } from 'three';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
 
 import { SingleLabelLoader, MultiLabelLoader } from 'package/3d/loaders/LabelLoader';
@@ -160,14 +160,19 @@ const HeartView = () => {
                 const focused = focusId === Number(id);
                 return(
                   <>
-                    <mesh key={id} userData={id}>
+                    <mesh key={id} userData={id} onClick={() => setFocusId(id)}>
                       <MultiGeometry geometry={geometry}/>
                       {/* new Color(Math.random() * 0xffffff) */}
                       <meshPhongMaterial color={focused ? '#00FF00' : '#d8b095'}/>
                     </mesh>
                     <group position={geometry.boundingSphere!.center}>
                       <Html center>
-                        <div style={{ width: '100px',fontSize: focused ? '26px': '16px', background: focused ? 'rgba(0, 0, 0, 0.6)': 'transparent'}}>
+                        <div 
+                          onClick={() => setFocusId(id)}
+                          style={{ 
+                            width: '100px',
+                            fontSize: focused ? '26px': '16px',
+                            background: focused ? 'rgba(0, 0, 0, 0.6)': 'transparent'}}>
                           {coronaryMap[`${id}`]['en']}
                         </div>
                       </Html>
