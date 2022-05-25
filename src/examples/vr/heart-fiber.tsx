@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useThree, extend, useFrame } from '@react-three/fiber';
-import { BufferGeometry, Vector3, AxesHelper } from 'three';
+import { BufferGeometry, Vector3, AxesHelper, Mesh } from 'three';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
 
 import { SingleLabelLoader, MultiLabelLoader } from 'package/3d/loaders/LabelLoader';
@@ -67,6 +67,23 @@ const MultiGeometry = ({ geometry }: { geometry: any }) => {
   );
 };
 
+const Marker = ({ position, center }: { position: Vector3, center: Vector3 }) => {
+ const mesh = useRef<any>();
+
+  // useEffect(() => {
+  //   if(mesh.current){
+  //     mesh.current.lookAt(0 - center.x, 0 - center.y, 0 - center.z);
+  //   }
+  // }, [center, mesh]);
+
+  return(
+    <mesh position={position} ref={mesh}>
+      <torusGeometry args={[5, 0.5, 10, 100]}/>
+      <meshBasicMaterial color={0xffff00}/>
+    </mesh>
+  );
+};
+
 const Scene = ({ children }: { children: React.ReactNode }) => {
   const { camera, scene, gl } = useThree();
   const control = useRef<any>();
@@ -129,6 +146,16 @@ const HeartView = () => {
     return multiGeo && Array.from(multiGeo);
   }, [multiGeo]);
 
+  const focusedPosition = useMemo(() => {
+    if(data && data.length > 0) {
+      const geometry = data.find(({ userData }) => userData.id === focusId);
+      const center = geometry && geometry!.boundingSphere!.center;
+      return center;
+    }
+  }, [data, focusId]);
+
+  const centerVector = useMemo(() => (new Vector3(...center)), [center]);
+
   return(
     <div style={{position: 'relative', top: '0px', right: '0px', bottom: '0px', height: '100%'}}>
       <div style={{position: 'absolute', left: '10px', top: '10px', width: '80px', height: '100%', zIndex: '2'}}>
@@ -149,7 +176,7 @@ const HeartView = () => {
         <Scene>
           <ambientLight intensity={0.2} color={0xffffff} />
           <hemisphereLight intensity={0.4} />
-          <group position={useMemo(() => (new Vector3(...center)), [center])}>
+          <group position={centerVector}>
             <mesh renderOrder={-1}>
               <bufferGeometry ref={ref} attach="geometry"/>
               <meshPhongMaterial color={'#dd4a39'} transparent={true} opacity={0.9} shininess={60}/>
@@ -172,7 +199,9 @@ const HeartView = () => {
                           style={{ 
                             width: '100px',
                             fontSize: focused ? '26px': '16px',
-                            background: focused ? 'rgba(0, 0, 0, 0.6)': 'transparent'}}>
+                            // background: focused ? 'rgba(0, 0, 0, 0.6)': 'transparent'
+                          }}
+                          >
                           {coronaryMap[`${id}`]['en']}
                         </div>
                       </Html>
@@ -180,6 +209,10 @@ const HeartView = () => {
                   </>
                 )
               })
+            }
+            {
+              focusedPosition &&
+              <Marker position={focusedPosition} center={centerVector}/>
             }
           </group>
         </Scene>
