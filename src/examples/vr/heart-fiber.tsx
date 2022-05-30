@@ -120,12 +120,12 @@ const HeartView = () => {
 
   useEffect(() => {
     const fetchData = async() => {
-      const geometry = await SingleLabelLoader('http://192.168.1.7:8080/heart/heart.vtp.gz');
+      const geometry = await SingleLabelLoader('http://127.0.0.1:8080/heart/heart.vtp.gz');
       geometry.computeBoundingSphere();
       const center = geometry.boundingSphere!.center;
       setCenter([-center.x, -center.y, -center.z]);
       setGeo(geometry);
-      const multiGeometry = await MultiLabelLoader('http://192.168.1.7:8080/heart/coronary.vtp.gz');
+      const multiGeometry = await MultiLabelLoader('http://127.0.0.1:8080/heart/coronary.vtp.gz');
       let a = [];
       for await (const v of multiGeometry) {
         a.push(v);

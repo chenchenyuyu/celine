@@ -20,7 +20,7 @@ const VR = () => {
  }, []);
 
  const fetchResult = useCallback(async() => {
-  const geometry = await SingleLabelLoader('http://192.168.1.7:8080/heart/heart.vtp.gz');
+  const geometry = await SingleLabelLoader('http://127.0.0.1:8080/heart/heart.vtp.gz');
   setGeo(geometry);
  }, []);
 
