@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useThree, extend, useFrame } from '@react-three/fiber';
-import { BufferGeometry, Vector3, AxesHelper, Mesh } from 'three';
+import { BufferGeometry, Vector3, AxesHelper, CameraHelper, DoubleSide } from 'three';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
 
 import { SingleLabelLoader, MultiLabelLoader } from 'package/3d/loaders/LabelLoader';
@@ -67,19 +67,42 @@ const MultiGeometry = ({ geometry }: { geometry: any }) => {
   );
 };
 
-const Marker = ({ position, center }: { position: Vector3, center: Vector3 }) => {
- const mesh = useRef<any>();
+interface IMarker {
+  position: Vector3,
+  center: Vector3,
+  type?: string,
+  radius: number,
+}
 
-  // useEffect(() => {
-  //   if(mesh.current){
-  //     mesh.current.lookAt(0 - center.x, 0 - center.y, 0 - center.z);
-  //   }
-  // }, [center, mesh]);
+const Marker = ({ position, center, type = 'torus', radius }: IMarker) => {
+ const mesh = useRef<any>();
+  const { camera, scene } = useThree();
+
+  useEffect(() => {
+    if(mesh.current){
+      // lookAt position - center position
+      mesh.current.lookAt(position.x-center.x, position.y-center.y, position.z-center.z);
+      mesh.current.rotateX(-Math.PI / 2);
+      const helper = new CameraHelper(camera);
+      scene.add( helper );
+    }
+  }, [center, mesh, camera, scene, position]);
 
   return(
-    <mesh position={position} ref={mesh}>
-      <torusGeometry args={[5, 0.5, 10, 100]}/>
-      <meshBasicMaterial color={0xffff00}/>
+    <mesh position={position} ref={mesh} renderOrder={2}>
+      {
+        type === 'torus' &&
+        <torusGeometry args={[5, 0.5, 10, 100]}/>
+      }
+      {
+        type === 'sphere' &&
+        <sphereGeometry args={[radius, 20, 20]}/>
+      }
+      {
+        type === 'plane' &&
+        <planeGeometry args={[30, 30]}/>
+      }
+      <meshBasicMaterial color={0xffff00} side={DoubleSide}/>
     </mesh>
   );
 };
@@ -117,8 +140,11 @@ const HeartView = () => {
   // multiple geometry
   const [multiGeo, setMultiGeo] = useState<BufferGeometry[]>([]);
   const [focusId, setFocusId] = useState<number>(-1);
+  const [markerPosition, setMarkerPosition] = useState<Vector3>();
+
 
   useEffect(() => {
+    // TODO: 待处理heart加载异常问题
     const fetchData = async() => {
       const geometry = await SingleLabelLoader('http://127.0.0.1:8080/heart/heart.vtp.gz');
       geometry.computeBoundingSphere();
@@ -150,11 +176,19 @@ const HeartView = () => {
     if(data && data.length > 0) {
       const geometry = data.find(({ userData }) => userData.id === focusId);
       const center = geometry && geometry!.boundingSphere!.center;
-      return center;
+      const radius = geometry && geometry!.boundingSphere!.radius;
+      // setMarkerPosition(center);
+      return { center, radius };
     }
   }, [data, focusId]);
 
   const centerVector = useMemo(() => (new Vector3(...center)), [center]);
+
+  const clickedPoint = (e: any) => {
+    const point = e.point.clone();
+    setMarkerPosition(point.sub(centerVector.clone()));
+    e.stopPropagation();
+  }
 
   return(
     <div style={{position: 'relative', top: '0px', right: '0px', bottom: '0px', height: '100%'}}>
@@ -187,16 +221,24 @@ const HeartView = () => {
                 const focused = focusId === Number(id);
                 return(
                   <>
-                    <mesh key={id} userData={id} onClick={() => setFocusId(id)}>
+                    <mesh 
+                      key={id}
+                      userData={id}
+                      onClick={(e) => {
+                        if(id !== focusId) {
+                          setFocusId(id);
+                        }
+                        clickedPoint(e);}}
+                      >
                       <MultiGeometry geometry={geometry}/>
                       {/* new Color(Math.random() * 0xffffff) */}
-                      <meshPhongMaterial color={focused ? '#00FF00' : '#d8b095'}/>
+                      <meshPhongMaterial color={focused ? '#00FF00' : '#D3D3D3'} transparent={false}/>
                     </mesh>
                     <group position={geometry.boundingSphere!.center}>
                       <Html center>
                         <div 
                           onClick={() => setFocusId(id)}
-                          style={{ 
+                          style={{
                             width: '100px',
                             fontSize: focused ? '26px': '16px',
                             // background: focused ? 'rgba(0, 0, 0, 0.6)': 'transparent'
@@ -211,8 +253,13 @@ const HeartView = () => {
               })
             }
             {
-              focusedPosition &&
-              <Marker position={focusedPosition} center={centerVector}/>
+              focusedPosition && markerPosition && focusedPosition.radius &&
+              <Marker 
+                type='torus'
+                position={markerPosition}
+                center={centerVector}
+                radius={focusedPosition.radius}
+              />
             }
           </group>
         </Scene>
