@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 // import VRViewport from './examples/vr/heart-react';
 import Heart from 'examples/vr/heart-fiber';

@@ -2,11 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useThree, extend, useFrame } from '@react-three/fiber';
 import { BufferGeometry, Vector3, AxesHelper, CameraHelper, DoubleSide } from 'three';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
+// import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { CSS2DObject } from 'package/3d/renderers/CSS2DRenderer';
 
 import { SingleLabelLoader, MultiLabelLoader } from 'package/3d/loaders/LabelLoader';
 import Html from 'package/3d/Html';
 
 import { coronaryMap } from './MAP';
+import useCSS2DRenderer from 'hooks/useCSS2DRenderer';
 
 extend({ TrackballControls });
 
@@ -35,6 +38,20 @@ const styleItem = (clicked: boolean) => ({
   borderBottom: '1px solid #000',
 });
 
+const styleRadio = (clicked: boolean) => ({
+  width: '100px',
+  height: '30px',
+  lineHeight: '30px',
+  textAlgin: 'center',
+  display: 'inline-block',
+  color: '#fff',
+  background: clicked ? '#0164fe' : '#222a42',
+  marginRight: '4px',
+  borderRadius: '4px',
+  cursor: 'pointer',
+  borderBottom: '1px solid #000',
+});
+
 interface IButton {
   id: number,
   focusId: number,
@@ -53,6 +70,18 @@ const Item = ({ id, focusId, setFocusId, children }: IButton) => {
     <div style={styleItem(id === focusId)} onClick={() => setFocusId(id)}>{children}</div>
   );
 }
+
+interface IRadio {
+  clicked: boolean,
+  setClicked: (v: boolean) => void,
+  children: React.ReactNode,
+}
+
+const Radio = ({ clicked, setClicked, children }: IRadio) => {
+  return(
+    <div style={styleRadio(clicked)} onClick={() => setClicked(!clicked)}>{children}</div>
+  );
+};
 
 const MultiGeometry = ({ geometry }: { geometry: any }) => {
   const ref = useRef<BufferGeometry>(null!);
@@ -107,6 +136,12 @@ const Marker = ({ position, center, type = 'torus', radius }: IMarker) => {
   );
 };
 
+
+const CSS2dRender = () => {
+  useCSS2DRenderer();
+  return null;
+};
+
 const Scene = ({ children }: { children: React.ReactNode }) => {
   const { camera, scene, gl } = useThree();
   const control = useRef<any>();
@@ -132,6 +167,57 @@ const Scene = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+interface IMesh {
+  id: number,
+  position: Vector3,
+  geometry: BufferGeometry,
+  focusId: number,
+  focused: boolean,
+  clicked2dObject: boolean,
+  setFocusId: (v: number) => void,
+  clickedPoint: (e: any) => void,
+}
+
+const Mesh = ({ id, position, focusId, clicked2dObject, geometry, focused, setFocusId, clickedPoint }: IMesh) => {
+  const ref = useRef<any>();
+
+  useEffect(() => {
+    if(ref.current && position && clicked2dObject) {
+      const div = document.createElement('div');
+      div.className = 'label';
+      div.textContent = `${id}`;
+      div.style.color = '#fff';
+      div.style.borderRadius = '4px';
+      div.style.pointerEvents = "none";
+      div.style.padding = '1px 2px';
+      div.style.backgroundColor = 'blue';
+      div.style.opacity = '0.8';
+      const object = new CSS2DObject(div);
+      object.position.copy(position);
+      ref.current.add(object);
+
+      return () => {
+        ref!.current.remove(object);
+      }
+    }
+  }, [ref, id, position, clicked2dObject]);
+
+  return(
+    <mesh
+      ref={ref}
+      key={id}
+      onClick={(e) => {
+      if(id !== focusId) {
+        setFocusId(id);
+      }
+      clickedPoint(e);}}
+    >
+    <MultiGeometry geometry={geometry}/>
+    <meshPhongMaterial color={focused ? '#00FF00' : '#D3D3D3'} transparent={false}/>
+  </mesh>
+  );
+};
+
 const HeartView = () => {
   const ref = useRef<BufferGeometry>(null!);
   const [geo, setGeo] = useState<BufferGeometry>(null!);
@@ -142,6 +228,9 @@ const HeartView = () => {
   const [focusId, setFocusId] = useState<number>(-1);
   const [markerPosition, setMarkerPosition] = useState<Vector3>();
 
+  // radio state
+  const [clickedHtml, setClickedHtml] = useState(false);
+  const [clicked2dObject, setClicked2dObject] = useState(false);
 
   useEffect(() => {
     // TODO: 待处理heart加载异常问题
@@ -188,25 +277,41 @@ const HeartView = () => {
     const point = e.point.clone();
     setMarkerPosition(point.sub(centerVector.clone()));
     e.stopPropagation();
-  }
+  } 
 
   return(
     <div style={{position: 'relative', top: '0px', right: '0px', bottom: '0px', height: '100%'}}>
-      <div style={{position: 'absolute', left: '10px', top: '10px', width: '80px', height: '100%', zIndex: '2'}}>
+      <div style={{position: 'absolute', left: '10px', top: '10px', width: '80px', height: '100%', zIndex: 2}}>
       {
         data.map(({ userData: { id } }) => (
-          <Button id={id} focusId={focusId} setFocusId={setFocusId}>{coronaryMap[`${id}`]['en']}</Button>
+          <Button key={id} id={id} focusId={focusId} setFocusId={setFocusId}>{coronaryMap[`${id}`]['en']}</Button>
         ))
       }
       </div>
-      <div style={{position: 'absolute', right: '10px', top: '10px', width: '200px', height: '100%', zIndex: '2'}}>
+      <div style={{position: 'absolute', right: '10px', top: '10px', width: '200px', height: '100%', zIndex: 2}}>
         {
            data.map(({ userData: { id } }) => (
-            <Item id={id} focusId={focusId} setFocusId={setFocusId}>{coronaryMap[`${id}`]['zh']}</Item>
+            <Item key={id} id={id} focusId={focusId} setFocusId={setFocusId}>{coronaryMap[`${id}`]['zh']}</Item>
           ))
         }
       </div>
+      <div style={{position: 'absolute', top: '20px', left: '80px', height: '60px', zIndex: 2}}>
+       <Radio clicked={clickedHtml} setClicked={() => { setClickedHtml(!clickedHtml); setClicked2dObject(false); }}>
+         {
+           !clickedHtml ? '隐藏Label': '显示Label'
+         }
+       </Radio>
+       <Radio clicked={clicked2dObject} setClicked={() => { setClicked2dObject(!clicked2dObject); setClickedHtml(false); }}>
+         {
+           !clicked2dObject ? '隐藏2dObject': '显示2dObject'
+         }
+       </Radio>
+      </div>
        <Canvas style={{position: 'absolute', top: '0px', right: '0px', bottom: '0px'}}>
+        {
+          clicked2dObject && data &&
+            <CSS2dRender/>
+        }
         <Scene>
           <ambientLight intensity={0.2} color={0xffffff} />
           <hemisphereLight intensity={0.4} />
@@ -221,7 +326,18 @@ const HeartView = () => {
                 const focused = focusId === Number(id);
                 return(
                   <>
-                    <mesh 
+                    <Mesh
+                      id={id}
+                      key={id}
+                      position={geometry.boundingSphere.center}
+                      geometry={geometry}
+                      focusId={focusId}
+                      clicked2dObject={clicked2dObject}
+                      setFocusId={setFocusId}
+                      focused={focused}
+                      clickedPoint={clickedPoint}
+                    />
+                    {/* <mesh 
                       key={id}
                       userData={id}
                       onClick={(e) => {
@@ -231,23 +347,25 @@ const HeartView = () => {
                         clickedPoint(e);}}
                       >
                       <MultiGeometry geometry={geometry}/>
-                      {/* new Color(Math.random() * 0xffffff) */}
                       <meshPhongMaterial color={focused ? '#00FF00' : '#D3D3D3'} transparent={false}/>
-                    </mesh>
-                    <group position={geometry.boundingSphere!.center}>
-                      <Html center>
-                        <div 
-                          onClick={() => setFocusId(id)}
-                          style={{
-                            width: '100px',
-                            fontSize: focused ? '26px': '16px',
-                            // background: focused ? 'rgba(0, 0, 0, 0.6)': 'transparent'
-                          }}
-                          >
-                          {coronaryMap[`${id}`]['en']}
-                        </div>
-                      </Html>
-                    </group>
+                    </mesh> */}
+                    {
+                      clickedHtml &&
+                      <group position={geometry.boundingSphere!.center}>
+                        <Html center>
+                          <div 
+                            onClick={() => setFocusId(id)}
+                            style={{
+                              width: '100px',
+                              fontSize: focused ? '26px': '16px',
+                              // background: focused ? 'rgba(0, 0, 0, 0.6)': 'transparent'
+                            }}
+                            >
+                            {coronaryMap[`${id}`]['en']}
+                          </div>
+                        </Html>
+                      </group>
+                    }
                   </>
                 )
               })
