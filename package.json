@@ -19,6 +19,7 @@
     "react-router-dom": "6",
     "react-scripts": "5.0.1",
     "three": "^0.140.2",
+    "three-mesh-bvh": "^0.5.11",
     "typescript": "^4.4.2",
     "utility-types": "^3.10.0",
     "vtk.js": "^24.13.0",

@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useThree, extend, useFrame } from '@react-three/fiber';
 import { BufferGeometry, Vector3, AxesHelper, CameraHelper, DoubleSide } from 'three';
+import { MeshBVHVisualizer } from 'three-mesh-bvh';
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls';
 // import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { CSS2DObject } from 'package/3d/renderers/CSS2DRenderer';
 
 import { SingleLabelLoader, MultiLabelLoader } from 'package/3d/loaders/LabelLoader';
 import Html from 'package/3d/Html';
+import useBVH from 'hooks/useBVH';
 
 import { coronaryMap } from './MAP';
 import useCSS2DRenderer from 'hooks/useCSS2DRenderer';
@@ -136,6 +138,24 @@ const Marker = ({ position, center, type = 'torus', radius }: IMarker) => {
   );
 };
 
+// const Helper = ({ visibleBVH }: { visibleBVH: boolean }) => {
+//   const [bvhHelper] = useState(() => new MeshBVHVisualizer());
+//   const { scene } = useThree();
+
+//   useEffect(() => {
+//     if(visibleBVH) {
+//       scene.add(bvhHelper);
+//     } else {
+//       scene.remove(bvhHelper);
+//     }
+//     return () => {
+//       scene.remove(bvhHelper);
+//     }
+//   }, [visibleBVH, scene, bvhHelper]);
+
+//   return null;
+// };
+
 
 const CSS2dRender = () => {
   useCSS2DRenderer();
@@ -169,6 +189,7 @@ const Scene = ({ children }: { children: React.ReactNode }) => {
 
 interface IMesh {
   id: number,
+  bvh?: boolean,
   position: Vector3,
   geometry: BufferGeometry,
   focusId: number,
@@ -178,8 +199,13 @@ interface IMesh {
   clickedPoint: (e: any) => void,
 }
 
-const Mesh = ({ id, position, focusId, clicked2dObject, geometry, focused, setFocusId, clickedPoint }: IMesh) => {
+const Mesh = ({ id, bvh, position, focusId, clicked2dObject, geometry, focused, setFocusId, clickedPoint }: IMesh) => {
+  const dummyRef = useRef<any>();
   const ref = useRef<any>();
+
+  useBVH(bvh ? ref : dummyRef, {
+    strategy: 'CENTER'
+  });
 
   useEffect(() => {
     if(ref.current && position && clicked2dObject) {
@@ -214,7 +240,7 @@ const Mesh = ({ id, position, focusId, clicked2dObject, geometry, focused, setFo
     >
     <MultiGeometry geometry={geometry}/>
     <meshPhongMaterial color={focused ? '#00FF00' : '#D3D3D3'} transparent={false}/>
-  </mesh>
+  </mesh> 
   );
 };
 
@@ -231,6 +257,8 @@ const HeartView = () => {
   // radio state
   const [clickedHtml, setClickedHtml] = useState(false);
   const [clicked2dObject, setClicked2dObject] = useState(false);
+  const [clickedBVH, setClickedBVH] = useState(false);
+  const [clickedBVHHelper, setBVHHelper] = useState(false);
 
   useEffect(() => {
     // TODO: 待处理heart加载异常问题
@@ -306,6 +334,8 @@ const HeartView = () => {
            !clicked2dObject ? '隐藏2dObject': '显示2dObject'
          }
        </Radio>
+       <Radio clicked={clickedBVH} setClicked={setClickedBVH}>BVH</Radio>
+       <Radio clicked={clickedBVHHelper} setClicked={setBVHHelper}>BVHHelper</Radio>
       </div>
        <Canvas style={{position: 'absolute', top: '0px', right: '0px', bottom: '0px'}}>
         {
@@ -328,6 +358,7 @@ const HeartView = () => {
                   <>
                     <Mesh
                       id={id}
+                      bvh={clickedBVH}
                       key={id}
                       position={geometry.boundingSphere.center}
                       geometry={geometry}
