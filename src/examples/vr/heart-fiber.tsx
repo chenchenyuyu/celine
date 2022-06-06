@@ -9,6 +9,7 @@ import { CSS2DObject } from 'package/3d/renderers/CSS2DRenderer';
 import { SingleLabelLoader, MultiLabelLoader } from 'package/3d/loaders/LabelLoader';
 import Html from 'package/3d/Html';
 import useBVH from 'hooks/useBVH';
+import AddRaycaster from 'package/3d/AddRaycaster';
 
 import { coronaryMap } from './MAP';
 import useCSS2DRenderer from 'hooks/useCSS2DRenderer';
@@ -163,12 +164,13 @@ const CSS2dRender = () => {
 };
 
 const Scene = ({ children }: { children: React.ReactNode }) => {
-  const { camera, scene, gl } = useThree();
+  const { camera, scene, gl, raycaster } = useThree();
   const control = useRef<any>();
 
   useEffect(() => {
     const axesHelper = new AxesHelper( 500 );
     scene.add( axesHelper );
+    raycaster.firstHitOnly = true;
     if(control.current) {
       control.current.up0.set(0, 0, 1);
       control.current.position0.set(0, -300, 0);
@@ -244,6 +246,17 @@ const Mesh = ({ id, bvh, position, focusId, clicked2dObject, geometry, focused, 
   );
 };
 
+const DegbugRayCast = ({ containerRay, position }: { containerRay: any, position: Vector3 }) => {
+  return(
+    <group position={useMemo(() => position && position.clone().negate(), [position])}>
+      {new Array(50).fill({}).map((_, id) => {
+        return <AddRaycaster key={id} containerRay={containerRay}/>
+      })}
+    </group>
+  );
+};
+
+
 const HeartView = () => {
   const ref = useRef<BufferGeometry>(null!);
   const [geo, setGeo] = useState<BufferGeometry>(null!);
@@ -259,6 +272,9 @@ const HeartView = () => {
   const [clicked2dObject, setClicked2dObject] = useState(false);
   const [clickedBVH, setClickedBVH] = useState(false);
   const [clickedBVHHelper, setBVHHelper] = useState(false);
+
+  // raycaster
+  const containerRay = useRef<any>();
 
   useEffect(() => {
     // TODO: 待处理heart加载异常问题
@@ -350,57 +366,60 @@ const HeartView = () => {
               <bufferGeometry ref={ref} attach="geometry"/>
               <meshPhongMaterial color={'#dd4a39'} transparent={true} opacity={0.9} shininess={60}/>
             </mesh>
-            {
-              data && data.map((geometry: any) => {
-                const id = geometry.userData.id;
-                const focused = focusId === Number(id);
-                return(
-                  <>
-                    <Mesh
-                      id={id}
-                      bvh={clickedBVH}
-                      key={id}
-                      position={geometry.boundingSphere.center}
-                      geometry={geometry}
-                      focusId={focusId}
-                      clicked2dObject={clicked2dObject}
-                      setFocusId={setFocusId}
-                      focused={focused}
-                      clickedPoint={clickedPoint}
-                    />
-                    {/* <mesh 
-                      key={id}
-                      userData={id}
-                      onClick={(e) => {
-                        if(id !== focusId) {
-                          setFocusId(id);
-                        }
-                        clickedPoint(e);}}
-                      >
-                      <MultiGeometry geometry={geometry}/>
-                      <meshPhongMaterial color={focused ? '#00FF00' : '#D3D3D3'} transparent={false}/>
-                    </mesh> */}
-                    {
-                      clickedHtml &&
-                      <group position={geometry.boundingSphere!.center}>
-                        <Html center>
-                          <div 
-                            onClick={() => setFocusId(id)}
-                            style={{
-                              width: '100px',
-                              fontSize: focused ? '26px': '16px',
-                              // background: focused ? 'rgba(0, 0, 0, 0.6)': 'transparent'
-                            }}
-                            >
-                            {coronaryMap[`${id}`]['en']}
-                          </div>
-                        </Html>
-                      </group>
-                    }
-                  </>
-                )
-              })
-            }
+            <group ref={containerRay}>
+              {
+                data && data.map((geometry: any) => {
+                  const id = geometry.userData.id;
+                  const focused = focusId === Number(id);
+                  return(
+                    <>
+                      <Mesh
+                        id={id}
+                        bvh={clickedBVH}
+                        key={id}
+                        position={geometry.boundingSphere.center}
+                        geometry={geometry}
+                        focusId={focusId}
+                        clicked2dObject={clicked2dObject}
+                        setFocusId={setFocusId}
+                        focused={focused}
+                        clickedPoint={clickedPoint}
+                      />
+                      {/* <mesh 
+                        key={id}
+                        userData={id}
+                        onClick={(e) => {
+                          if(id !== focusId) {
+                            setFocusId(id);
+                          }
+                          clickedPoint(e);}}
+                        >
+                        <MultiGeometry geometry={geometry}/>
+                        <meshPhongMaterial color={focused ? '#00FF00' : '#D3D3D3'} transparent={false}/>
+                      </mesh> */}
+                      {
+                        clickedHtml &&
+                        <group position={geometry.boundingSphere!.center}>
+                          <Html center>
+                            <div 
+                              onClick={() => setFocusId(id)}
+                              style={{
+                                width: '100px',
+                                fontSize: focused ? '26px': '16px',
+                                // background: focused ? 'rgba(0, 0, 0, 0.6)': 'transparent'
+                              }}
+                              >
+                              {coronaryMap[`${id}`]['en']}
+                            </div>
+                          </Html>
+                        </group>
+                      }
+                    </>
+                  )
+                })
+              }
+            </group>
+            <DegbugRayCast containerRay={containerRay} position={centerVector}/>
             {
               focusedPosition && markerPosition && focusedPosition.radius &&
               <Marker 

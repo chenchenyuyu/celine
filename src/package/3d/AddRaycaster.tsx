@@ -6,12 +6,12 @@ import { useFrame } from '@react-three/fiber';
 // hit mesh
 // cylinder mesh
 
-const pointDist = 25;
+const pointDist = 100;
 const origVec = new Vector3();
 const dirVec = new Vector3();
 const raycaster = new Raycaster();
 
-const speed = 10;
+const speed = 2;
 
 const AddRaycaster = ({ containerRay }: { containerRay: any }) => {
   const objMesh = useRef<any>();
@@ -38,11 +38,11 @@ const AddRaycaster = ({ containerRay }: { containerRay: any }) => {
 
   useFrame((_, deltaTime) => {
     const obj = objMesh.current;
-    if(!obj || !origMesh.current || !cylinderMesh.current || !hitMesh.current) {
+    if(!obj || !origMesh.current || !cylinderMesh.current || !hitMesh.current || !containerRay.current) {
       return;
     }
 
-    obj.current.rotation.x += xDir * 0.0001 * speed * deltaTime;
+    obj.rotation.x += xDir * 0.0001 * speed * deltaTime;
     obj.rotation.y += yDir * 0.0001 * speed * deltaTime;
     obj.rotation.z += zDir * 0.0001 * speed * deltaTime;
 
@@ -52,7 +52,7 @@ const AddRaycaster = ({ containerRay }: { containerRay: any }) => {
 
     raycaster.set( origVec, dirVec );
     raycaster.firstHitOnly = true;
-    const res = raycaster.intersectObject(containerRay, true );
+    const res = raycaster.intersectObject(containerRay.current, true );
     const length = res.length ? res[ 0 ].distance : pointDist;
 
     hitMesh.current.position.set( pointDist - length, 0, 0 );
@@ -66,15 +66,15 @@ const AddRaycaster = ({ containerRay }: { containerRay: any }) => {
   return(
     <group ref={objMesh}>
       <mesh ref={origMesh}>
-        <sphereGeometry args={[0.25, 20, 20]}/>
+        <sphereGeometry args={[5, 40, 40]}/>
         <meshBasicMaterial color={0xffffff}/>
       </mesh>
       <mesh ref={hitMesh}>
-        <sphereGeometry args={[0.25, 20, 20]}/>
-        <meshBasicMaterial color={0xffffff}/>
+        <sphereGeometry args={[5, 40, 40]}/>
+        <meshBasicMaterial color={0xFFFF00}/>
       </mesh>
       <mesh ref={cylinderMesh}>
-        <cylinderGeometry args={[0.01, 0.01]}/>
+        <cylinderGeometry args={[0.1, 0.1]}/>
         <meshBasicMaterial color={0xffffff} transparent={true} opacity={0.25}/>
       </mesh>
     </group>
