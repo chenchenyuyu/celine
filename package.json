@@ -13,6 +13,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/three": "^0.140.0",
+    "gl-matrix": "^3.4.3",
     "parsedcp": "git+ssh://git@code.infervision.com:2022/feteam/parsedcp.git",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
