@@ -22,7 +22,7 @@ interface IBuffers {
 // NOTE: 1. 顶点着色器, 着色器：GLSL编写语言
 // NOTE: 2. 片段着色器, 着色器程序 = 顶点着色器+片段着色器
 // NOTE: 3. 给顶点着色: 每个顶点有位置和颜色信息, 在默认情况下，所有像素的颜色（以及它所有的属性，包括位置）都由线性插值计算得来，自动形成平滑的渐变
-// NOTE: 4. 新增：修改initBuffers
+// NOTE: 4. demo3新增：修改initBuffers
 const Demo3 = () => {
 
   const initShaderProgram = useCallback((gl: WebGLRenderingContext, vsSource: string, fsSource: string) => {
@@ -106,7 +106,7 @@ const Demo3 = () => {
       gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
     }
 
-    // NOTE: 新增
+    // NOTE: demo3新增
     // Tell WebGL how to pull out the colors from the color buffer
     // into the vertexColor attribute.
     {
@@ -166,7 +166,7 @@ const Demo3 = () => {
     //     gl_Position = uModelViewMatrix * uProjectionMatrix * aVertexPosition;
     //   }
     // `;
-    // NOTE: 新增，修改顶点着色器，使得着色器可以从颜色缓冲区中正确取出颜色
+    // NOTE: demo3新增，修改顶点着色器，使得着色器可以从颜色缓冲区中正确取出颜色
     // 每个顶点都与一个颜色数组中的数值相连接
     const vsSource = `
       attribute vec3 aVertexPosition;
@@ -185,7 +185,7 @@ const Demo3 = () => {
 
     // 2. Fragment shader program 片段着色器
     // 作用：确定像素的颜色，通过指定应用到像素的纹理元素（也就是图形纹理中的像素），获取纹理元素的颜色，然后将适当的光照应用于颜色。
-    // NOTE: 新增为使每个像素都得到插值后的颜色，我们只需要在此从 vColor 变量中获取这个颜色的值：
+    // NOTE: demo3新增为使每个像素都得到插值后的颜色，我们只需要在此从 vColor 变量中获取这个颜色的值：
     const fsSource = `
       varying lowp vec4 vColor;
       void main(void) {
@@ -266,7 +266,7 @@ const Demo3 = () => {
     // JavaScript array, then use it to fill the current buffer.
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-    // NOTE: 新增color
+    // NOTE: demo3新增color
     const colorBuffer = gl.createBuffer();
     const colors = [
       1.0,  1.0,  1.0,  1.0,    // 白
@@ -284,7 +284,7 @@ const Demo3 = () => {
   };
 
   return(
-    <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid #fff'}} />
+    <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid #000'}} />
   );
 };
 

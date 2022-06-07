@@ -10,6 +10,7 @@ import Demo1 from 'examples/webgl/Demo1';
 import Demo2 from 'examples/webgl/Demo2';
 import Demo3 from 'examples/webgl/Demo3';
 import Demo4 from 'examples/webgl/Demo4';
+import Demo5 from 'examples/webgl/Demo5';
 
 import './App.css';
 
@@ -24,6 +25,7 @@ function App() {
         <Route path="/gl2" element={<Demo2 />}/>
         <Route path="/gl3" element={<Demo3 />}/>
         <Route path="/gl4" element={<Demo4 />}/>
+        <Route path="/gl5" element={<Demo5 />}/>
       </Routes>
     </div>
   );
