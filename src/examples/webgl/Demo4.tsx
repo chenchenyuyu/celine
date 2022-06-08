@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo } from "react";
+import React, { useCallback, useEffect } from "react";
 import { mat4 } from 'gl-matrix';
 
-// TODO: 待完善，旋转处理
 interface IProgramInfo {
   program: WebGLProgram;
   attribLocations: {
@@ -19,38 +18,12 @@ interface IBuffers {
   color: WebGLBuffer | null
 }
 
-
 // NOTE: 1. 顶点着色器, 着色器：GLSL编写语言
 // NOTE: 2. 片段着色器, 着色器程序 = 顶点着色器+片段着色器
 // NOTE: 3. 给顶点着色: 每个顶点有位置和颜色信息, 在默认情况下，所有像素的颜色（以及它所有的属性，包括位置）都由线性插值计算得来，自动形成平滑的渐变
 // NOTE: 4. demo3新增：修改initBuffers
-
-
 const Demo4 = () => {
-  let squareRotation = 0;
-  const canvas: HTMLCanvasElement | null = document.querySelector('#glcanvas');
-  const gl = canvas && canvas.getContext('webgl');
-  const vsSource = `
-    attribute vec3 aVertexPosition;
-    attribute vec4 aVertexColor;
-
-    uniform mat4 uModelViewMatrix;
-    uniform mat4 uProjectionMatrix;
-
-    varying lowp vec4 vColor;
-
-    void main(void) {
-      gl_Position = uProjectionMatrix* uModelViewMatrix * vec4(aVertexPosition, 1.0);
-      vColor = aVertexColor;
-    }
-  `;
-
-  const fsSource = `
-    varying lowp vec4 vColor;
-    void main(void) {
-      gl_FragColor = vColor;
-    }
-  `;
+  let squareRotation = 0.0;
 
   const initShaderProgram = useCallback((gl: WebGLRenderingContext, vsSource: string, fsSource: string) => {
     const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
@@ -69,63 +42,6 @@ const Demo4 = () => {
   
     return shaderProgram;
     }, []);
-
-    const shaderProgram = useMemo(() => gl && initShaderProgram(gl, vsSource, fsSource),[initShaderProgram, gl, fsSource, vsSource]) as WebGLProgram;
-
-    const initBuffers = useCallback((gl: WebGLRenderingContext) => {
-      // Create a buffer for the square's positions.
-      const positionBuffer = gl.createBuffer();
-      // Select the positionBuffer as the one to apply buffer
-      // operations to from here out.
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      // Now create an array of positions for the square.
-      const vertices = [
-        1.0,  1.0,
-       -1.0,  1.0,
-        1.0, -1.0,
-       -1.0, -1.0,
-      ];
-      // Now pass the list of positions into WebGL to build the
-      // shape. We do this by creating a Float32Array from the
-      // JavaScript array, then use it to fill the current buffer.
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  
-      // NOTE: demo3新增color
-      const colorBuffer = gl.createBuffer();
-      const colors = [
-        1.0,  1.0,  1.0,  1.0,    // 白
-        1.0,  0.0,  0.0,  1.0,    // 红
-        0.0,  1.0,  0.0,  1.0,    // 绿
-        0.0,  0.0,  1.0,  1.0,    // 蓝
-      ];
-      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors),gl.STATIC_DRAW);
-  
-      return {
-       position: positionBuffer,
-       color: colorBuffer,
-      }
-    }, []);
-
-    const programInfo = useMemo(() => {
-      if(!gl) {
-        return;
-      }
-      return {
-        program: shaderProgram,
-        attribLocations: {
-          vertexPosition: gl!.getAttribLocation(shaderProgram, 'aVertexPosition'),
-          vertexColor: gl!.getAttribLocation(shaderProgram, 'aVertexColor'),
-        },
-        uniformLocations: {
-          projectionMatrix: gl!.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-          modelViewMatrix: gl!.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-        },
-      }
-    }, [shaderProgram, gl]);
-
-    const buffers = useMemo(() => gl && initBuffers(gl), [gl, initBuffers]) as IBuffers;
-    
 
   // draw the scene
   // 着色器+buffers数据
@@ -170,11 +86,14 @@ const Demo4 = () => {
       modelViewMatrix,     // matrix to translate
       [-0.0, 0.0, -6.0]);  // amount to translate
 
-    // mat4.rotate(modelViewMatrix,  // destination matrix
-    //   modelViewMatrix,  // matrix to rotate
-    //   squareRotation,   // amount to rotate in radians
-    //   [0, 0, 1]);       // axis to rotate around
-
+    mat4.rotate(modelViewMatrix,  // destination matrix
+        modelViewMatrix,  // matrix to rotate
+        squareRotation,   // amount to rotate in radians
+        [0, 1, 0]);       // axis to rotate around
+    mat4.rotate(modelViewMatrix,  // destination matrix
+      modelViewMatrix,  // matrix to rotate
+      squareRotation,   // amount to rotate in radians
+      [1, 0, 0]);   
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute.
     {
@@ -233,28 +152,101 @@ const Demo4 = () => {
     }
 
     // Update the rotation for the next draw
-    // squareRotation += deltaTime;
+    squareRotation += deltaTime;
 
-    var then = 0;
+  }, []);
+
+  useEffect(() => {
+    const canvas: HTMLCanvasElement | null = document.querySelector('#glcanvas');
+    if(!canvas) return;
+
+    const gl = canvas.getContext('webgl');
+
+    if (!gl) {
+      alert('Unable to initialize WebGL. Your browser or machine may not support it.');
+      return;
+    }
+
+    // 1. Vertex shader program 顶点着色器
+    // 作用：将输入顶点从原始坐标系转换到 WebGL 使用的缩放空间 (clipspace) 坐标系，其中每个轴的坐标范围从-1.0 到 1.0，并且不考虑纵横比，实际尺寸或任何其他因素。
+    // const vsSource = `
+    //   attribute vec4 aVertexPosition;
+    //   uniform mat4 uModelViewMatrix;
+    //   uniform mat4 uProjectionMatrix;
+
+    //   void main() {
+    //     gl_Position = uModelViewMatrix * uProjectionMatrix * aVertexPosition;
+    //   }
+    // `;
+    // NOTE: demo3新增，修改顶点着色器，使得着色器可以从颜色缓冲区中正确取出颜色
+    // 每个顶点都与一个颜色数组中的数值相连接
+    const vsSource = `
+      attribute vec3 aVertexPosition;
+      attribute vec4 aVertexColor;
+
+      uniform mat4 uModelViewMatrix;
+      uniform mat4 uProjectionMatrix;
+
+      varying lowp vec4 vColor;
+
+      void main(void) {
+        gl_Position = uProjectionMatrix* uModelViewMatrix * vec4(aVertexPosition, 1.0);
+        vColor = aVertexColor;
+      }
+    `;
+
+    // 2. Fragment shader program 片段着色器
+    // 作用：确定像素的颜色，通过指定应用到像素的纹理元素（也就是图形纹理中的像素），获取纹理元素的颜色，然后将适当的光照应用于颜色。
+    // NOTE: demo3新增为使每个像素都得到插值后的颜色，我们只需要在此从 vColor 变量中获取这个颜色的值：
+    const fsSource = `
+      varying lowp vec4 vColor;
+      void main(void) {
+        gl_FragColor = vColor;
+      }
+    `;
+    // 3. 初始化着色器
+    // Initialize a shader program; this is where all the lighting
+    // for the vertices and so forth is established. 
+    const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+    
+    if(!shaderProgram) return;
+
+    // Collect all the info needed to use the shader program.
+    // Look up which attribute our shader program is using
+    // for aVertexPosition and look up uniform locations.
+    const programInfo = {
+      program: shaderProgram,
+      attribLocations: {
+        vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+        vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+      },
+      uniformLocations: {
+        projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
+        modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+      },
+    };
+    // Here's where we call the routine that builds all the
+    // objects we'll be drawing.
+    const buffers = initBuffers(gl);
+
+    // Draw the scene
+    // drawScene(gl, programInfo, buffers);
+
+    let then = 0;
 
     // Draw the scene repeatedly
     function render(now: any) {
       now *= 0.001;  // convert to seconds
       const deltaTime = now - then;
       then = now;
-  
-      drawScene(gl, programInfo, buffers, deltaTime);
-  
+      if(gl) {
+        drawScene(gl, programInfo, buffers, deltaTime);
+      }
       requestAnimationFrame(render);
     }
-  }, []);
+    requestAnimationFrame(render);
 
-  useLayoutEffect(() => {
-    if(gl && programInfo) {
-      // Draw the scene
-      drawScene(gl, programInfo, buffers, 0);
-    }
-  }, [gl, drawScene, programInfo, buffers, canvas]);
+  }, [drawScene, initShaderProgram]);
 
   // creates a shader of the given type, uploads the source and
   // compiles it.  
@@ -280,8 +272,45 @@ const Demo4 = () => {
     return shader;
   };
 
+  // Initialize the buffers we'll need. For this demo, we just
+  // have one object -- a simple two-dimensional square.
+  const initBuffers = (gl: WebGLRenderingContext) => {
+    // Create a buffer for the square's positions.
+    const positionBuffer = gl.createBuffer();
+    // Select the positionBuffer as the one to apply buffer
+    // operations to from here out.
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    // Now create an array of positions for the square.
+    const vertices = [
+      1.0,  1.0,
+     -1.0,  1.0,
+      1.0, -1.0,
+     -1.0, -1.0,
+    ];
+    // Now pass the list of positions into WebGL to build the
+    // shape. We do this by creating a Float32Array from the
+    // JavaScript array, then use it to fill the current buffer.
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+    // NOTE: demo3新增color
+    const colorBuffer = gl.createBuffer();
+    const colors = [
+      1.0,  1.0,  1.0,  1.0,    // 白
+      1.0,  0.0,  0.0,  1.0,    // 红
+      0.0,  1.0,  0.0,  1.0,    // 绿
+      0.0,  0.0,  1.0,  1.0,    // 蓝
+    ];
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors),gl.STATIC_DRAW);
+
+    return {
+     position: positionBuffer,
+     color: colorBuffer,
+    }
+  };
+
   return(
-    <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid #fff'}} />
+    <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid #000'}} />
   );
 };
 
