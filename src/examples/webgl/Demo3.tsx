@@ -284,7 +284,10 @@ const Demo3 = () => {
   };
 
   return(
-    <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid #000'}} />
+    <div className="demo3">
+      <div>Using shaders to apply color in WebGL</div>
+       <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid #000'}} />
+    </div>
   );
 };
 

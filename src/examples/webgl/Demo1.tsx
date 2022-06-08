@@ -21,7 +21,10 @@ const Demo1 = () => {
   }, []);
   
   return(
-    <canvas id="glcanvas" width={640} height={480}></canvas>
+    <div className="demo1">
+      <div>Getting started with WebGL</div>
+      <canvas id="glcanvas" width={640} height={480}></canvas>
+    </div>
   );
 };
 

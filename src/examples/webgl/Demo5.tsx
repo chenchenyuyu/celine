@@ -399,7 +399,10 @@ const Demo5 = () => {
   };
 
   return(
-    <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid yellow'}} />
+    <div className="demo5">
+      <div>Creating 3D objects using WebGL</div>
+      <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid yellow'}} />
+    </div>
   );
 };
 

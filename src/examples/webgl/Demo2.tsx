@@ -237,7 +237,10 @@ const Demo2 = () => {
   };
 
   return(
-    <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid red'}} />
+    <div className="demo2">
+      <div>Adding 2D content to a WebGL context</div>
+       <canvas id="glcanvas" width="640" height="480" style={{ backgroundColor: '#000', border: '2px solid red'}} />
+    </div>
   );
 };
 
