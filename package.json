@@ -14,7 +14,9 @@
     "@types/react-dom": "^18.0.0",
     "@types/three": "^0.140.0",
     "gl-matrix": "^3.4.3",
+    "glslify-loader": "^2.0.0",
     "parsedcp": "git+ssh://git@code.infervision.com:2022/feteam/parsedcp.git",
+    "raw-loader": "^4.0.2",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-router-dom": "6",
@@ -49,5 +51,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "customize-cra": "^1.0.0",
+    "react-app-rewired": "^2.2.1"
   }
 }
