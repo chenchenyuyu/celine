@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect } from "react";
 import { mat4 } from 'gl-matrix';
 
+import loadImage from 'utils/loadImage';
+
 interface IProgramInfo {
   program: WebGLProgram;
   attribLocations: {
@@ -235,13 +237,6 @@ const Demo6 = () => {
       return texture;
   }, []);
 
-   const loadImage = (url: string) => new Promise((resolve, reject) => {
-    const img = new Image();
-    // img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`load ${url} fail`));
-    img.src = url;
-  });
   // 判断是否是2的倍数
   const isPowerOf2 = (value: number) => {
     return (value & (value - 1)) === 0;

@@ -101,7 +101,7 @@ const Demo2 = () => {
 
     // Tell WebGL to use our program when drawing
     gl.useProgram(programInfo.program);
-    // Set the shader uniforms
+    // Set the shader uniforms // 在绘制前设置全局变量
     gl.uniformMatrix4fv(
         programInfo.uniformLocations.projectionMatrix,
         false,
