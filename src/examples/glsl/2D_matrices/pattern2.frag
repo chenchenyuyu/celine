@@ -28,7 +28,7 @@ float box(vec2 _st, vec2 _size, float _smoothEdges){
 }
 
 void main(){
-  vec2 st = gl_FragCoord.xy/u_resolution;
+  vec2 st = gl_FragCoord.xy/u_resolution.xy;
 
   vec3 color = vec3(0.0);
 
