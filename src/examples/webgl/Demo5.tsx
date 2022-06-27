@@ -360,10 +360,10 @@ const Demo5 = () => {
 
     let generatedColors = [] as number[];
 
-    for (let j = 0; j < 6; j++) {
+    for (let j = 0; j < 6; j++) { // 6个面
       let c = colors[j];
     
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 4; i++) { // 四个顶点，值保持为c的颜色值
         generatedColors = generatedColors.concat(c);
       }
     }

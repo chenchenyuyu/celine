@@ -178,12 +178,13 @@ const Demo6 = () => {
     // Specify the texture to map onto the faces.
 
     // Tell WebGL we want to affect texture unit 0
+    // GL 最多可同时注册 32 张纹理；gl.TEXTURE0 是第一张
     gl.activeTexture(gl.TEXTURE0);
 
     // Bind the texture to texture unit 0
     gl.bindTexture(gl.TEXTURE_2D, texture);
-
     // Tell the shader we bound the texture to texture unit 0
+  
     gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 
     {
