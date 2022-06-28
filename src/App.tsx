@@ -15,6 +15,7 @@ import Demo6 from 'examples/webgl/Demo6';
 import Demo7 from 'examples/webgl/Demo7';
 import Demo81 from 'examples/webgl/Demo8-1';
 import Demo82 from 'examples/webgl/Demo8-2';
+import Demo9 from 'examples/webgl/Demo9';
 
 import './App.css';
 
@@ -34,6 +35,7 @@ function App() {
         <Route path="/gl7" element={<Demo7 />}/>
         <Route path="/gl8-1" element={<Demo81 />}/>
         <Route path="/gl8-2" element={<Demo82 />}/>
+        <Route path="/gl9" element={<Demo9 />}/>
       </Routes>
     </div>
   );
