@@ -5,7 +5,6 @@ import { Routes, Route } from 'react-router-dom';
 import Heart from 'examples/vr/heart-fiber';
 // import Cube from './examples/cube/cube-react';
 import Cube1 from 'examples/cube/cube-fiber';
-import NotFound from './examples/notFound/index';
 import Demo1 from 'examples/webgl/Demo1';
 import Demo2 from 'examples/webgl/Demo2';
 import Demo3 from 'examples/webgl/Demo3';
@@ -16,6 +15,7 @@ import Demo7 from 'examples/webgl/Demo7';
 import Demo81 from 'examples/webgl/Demo8-1';
 import Demo82 from 'examples/webgl/Demo8-2';
 import Demo9 from 'examples/webgl/Demo9';
+import Math1 from 'examples/math/transform1';
 
 import './App.css';
 
@@ -25,7 +25,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Cube1 />} />
         <Route path="heart" element={<Heart />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<div>sorry! not Found</div>}/>
         <Route path="/gl1" element={<Demo1 />}/>
         <Route path="/gl2" element={<Demo2 />}/>
         <Route path="/gl3" element={<Demo3 />}/>
@@ -36,6 +36,7 @@ function App() {
         <Route path="/gl8-1" element={<Demo81 />}/>
         <Route path="/gl8-2" element={<Demo82 />}/>
         <Route path="/gl9" element={<Demo9 />}/>
+        <Route path="/math1" element={<Math1 />}/>
       </Routes>
     </div>
   );
