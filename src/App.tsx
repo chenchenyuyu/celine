@@ -16,6 +16,7 @@ import Demo81 from 'examples/webgl/Demo8-1';
 import Demo82 from 'examples/webgl/Demo8-2';
 import Demo9 from 'examples/webgl/Demo9';
 import Math1 from 'examples/math/transform1';
+import Hook from 'examples/react_hook/state';
 
 import './App.css';
 
@@ -23,7 +24,8 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        <Route path="/" element={<Cube1 />} />
+        <Route path="/" element={<Heart/>} />
+        <Route path="/Hook" element={<Hook/>}/>
         <Route path="heart" element={<Heart />} />
         <Route path="*" element={<div>sorry! not Found</div>}/>
         <Route path="/gl1" element={<Demo1 />}/>

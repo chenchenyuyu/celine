@@ -419,7 +419,7 @@ const HeartView = () => {
                 })
               }
             </group>
-            <DegbugRayCast containerRay={containerRay} position={centerVector}/>
+            {/* <DegbugRayCast containerRay={containerRay} position={centerVector}/> */}
             {
               focusedPosition && markerPosition && focusedPosition.radius &&
               <Marker 
