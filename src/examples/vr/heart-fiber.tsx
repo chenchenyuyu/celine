@@ -268,7 +268,7 @@ const HeartView = () => {
   const [markerPosition, setMarkerPosition] = useState<Vector3>();
 
   // radio state
-  const [clickedHtml, setClickedHtml] = useState(false);
+  const [clickedHtml, setClickedHtml] = useState(true);
   const [clicked2dObject, setClicked2dObject] = useState(false);
   const [clickedBVH, setClickedBVH] = useState(false);
   const [clickedBVHHelper, setBVHHelper] = useState(false);
