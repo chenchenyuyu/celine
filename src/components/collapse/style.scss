@@ -1,0 +1,62 @@
+.cs-collapse {
+    max-width: 600px;
+    width: 100%;
+    border-bottom: 1px solid #e2dbdb;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+
+    &-item {
+            border-left: 1px solid #e2dbdb;
+            border-right: 1px solid #e2dbdb;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            &-header {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                border-bottom: 1px solid #e2dbdb;
+                border-top: 1px solid #e2dbdb;
+                padding: 10px 10px 10px 20px;
+            }
+
+            &-arrow-right {
+                display: flex;
+                width: 7px;
+                height: 7px;
+                border-top: 2px solid #333;
+                border-right: 2px solid #333;
+                transform: rotate(45deg);
+                vertical-align: middle;
+                align-items: center;
+                cursor: pointer;
+                transition: 0.2s;
+                transform-origin: center;
+            }
+
+            &-arrow-down {
+                display: flex;
+                width: 7px;
+                height: 7px;
+                border-top: 2px solid #333;
+                border-right: 2px solid #333;
+                transition: 0.2s;
+                transform-origin: center;
+                transform: rotate(135deg);
+                vertical-align: middle;
+                align-items: center;
+                cursor: pointer;
+            }
+
+            &-title {
+                vertical-align: middle;
+                text-align: left;
+                margin-left: 20px;
+            }
+
+            &-body {
+                padding: 20px 10px;
+            }
+    }
+}

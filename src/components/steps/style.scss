@@ -1,0 +1,132 @@
+.cs-steps {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+    align-items: center;
+
+    &-main {
+        display: flex;
+        flex-direction: row;
+        margin: 20px;
+    }
+
+    &-content {
+        width: 70%;
+        height: 300px;
+        border: 1px dashed #666;
+        padding: 20px;
+    }
+
+    &-item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        &-content {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            &-circle {
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                text-align: center;
+                background-color: #F0F0F0;
+                color: #8D8D8D;
+                border-radius: 50%;
+                cursor: pointer;
+                margin-right: 20px;
+
+                &-active {
+                    background-color: #1677FF;
+                    color: #fff;
+                }
+
+                &-completed {
+                    background-color: #E6F4FF;
+                    color: #1677FF;
+                }
+            }
+
+            &-line {
+                width: 160px;
+                height: 2px;
+                margin: 0 20px;
+                background-color: #8D8D8D;
+
+                &-active{
+                    background-color: #1677FF;
+                    color: #fff;
+                }
+            }
+        }
+    }
+}
+
+.cs-steps-vertical {
+    display: flex;
+    flex-direction: row;
+    margin: 20px;
+    align-items: center;
+
+    &-main {
+        display: flex;
+        flex-direction: column;
+        margin: 20px;
+    }
+
+    &-content {
+        width: 70%;
+        height: 300px;
+        border: 1px dashed #666;
+        padding: 20px;
+    }
+
+    &-item {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+
+        &-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            &-circle {
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                text-align: center;
+                background-color: #F0F0F0;
+                color: #8D8D8D;
+                border-radius: 50%;
+                cursor: pointer;
+                margin: 10px 0;
+            }
+
+            .cs-steps-item-content-circle-active {
+                background-color: #1677FF;
+                color: #fff;
+            }
+
+            .cs-steps-item-content-circle-completed {
+                background-color: #E6F4FF;
+                color: #1677FF;
+            }
+        }
+    }
+}
+
+.cs-steps-item-content-line {
+
+    &-vertical {
+        width: 2px;
+        height: 160px;
+        margin: 20 0px;
+        background-color: #8D8D8D;
+    }
+
+    &-active{
+        background-color: #1677FF;
+        color: #fff;
+    }
+}
